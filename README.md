@@ -8,3 +8,5 @@
 * In the installed plugins tab, check the box corresponding to this plugin;
 * Ready to go! If it doesn't show up in your plugin tab, restart the software.
 
+#### Added an example tile file in the folder xanten_tiles.
+
