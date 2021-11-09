@@ -192,14 +192,8 @@ class TileSelector:
         layer = self.iface.activeLayer()
 
         for feat in layer.getSelectedFeatures():
-            value = feat.attribute('utm_coords')
-            split_value = str.split(value, sep=",")
-            easting = split_value[0].split(sep=":")
-            easting_coord = int(easting[1]) // 1000
-            northing = split_value[1].split(sep=":")
-            northing_coord = int(northing[1]) // 1000
-
-            tile_fname = f"dgm1_32_{easting_coord:d}_{northing_coord:d}_1_nw.xyz.gz"
+            tile_fname = feat.attribute('fname')
+            
             filepath = self.dlg.lineEdit.text() + "/" + tile_fname
             url_path = url + tile_fname
             req = requests.get(url_path)
@@ -220,17 +214,11 @@ class TileSelector:
             self.dlg = TileSelectorDialog()
             self.dlg.pushButton.clicked.connect(self.select_output)
 
-        """# Fetch the current loaded layers
-        layers = QgsProject.instance().layerTreeRoot().children()
-        # Clear the comboBox from previous runs
-        self.dlg.comboBox.clear()
-        # Fill the box with the loaded layers
-        self.dlg.comboBox.addItems([layer.name() for layer in layers])"""
 
         # Fetch the current active layer
         layer = self.iface.activeLayer()
         # Clear the listWidget from previous runs
-        # self.dlg.listWidget.clear()
+        self.dlg.listWidget.clear()
         # Fill the list with the active features names
         for feat in layer.getSelectedFeatures():
             self.dlg.listWidget.addItems([str(feat.attributes())])
