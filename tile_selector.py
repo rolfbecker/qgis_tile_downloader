@@ -214,17 +214,11 @@ class TileSelector:
             self.dlg = TileSelectorDialog()
             self.dlg.pushButton.clicked.connect(self.select_output)
 
-        """# Fetch the current loaded layers
-        layers = QgsProject.instance().layerTreeRoot().children()
-        # Clear the comboBox from previous runs
-        self.dlg.comboBox.clear()
-        # Fill the box with the loaded layers
-        self.dlg.comboBox.addItems([layer.name() for layer in layers])"""
 
         # Fetch the current active layer
         layer = self.iface.activeLayer()
         # Clear the listWidget from previous runs
-        # self.dlg.listWidget.clear()
+        self.dlg.listWidget.clear()
         # Fill the list with the active features names
         for feat in layer.getSelectedFeatures():
             self.dlg.listWidget.addItems([str(feat.attributes())])
