@@ -31,7 +31,9 @@ import requests
 from .resources import *
 # Import the code for the dialog
 from .tile_selector_dialog import TileSelectorDialog
-import os.path
+import os
+# Import GDAL to translate from XYZ to TIF
+from osgeo import gdal
 
 
 class TileSelector:
@@ -186,13 +188,18 @@ class TileSelector:
         directory = QFileDialog.getExistingDirectory(self.dlg, "Choose directory to download to")
         self.dlg.lineEdit.setText(directory)
 
-
+    
     def fetch_tile_packages(self):
         url = "https://www.opengeodata.nrw.de/produkte/geobasis/hm/dgm1_xyz/dgm1_xyz/"
         layer = self.iface.activeLayer()
-
+        outdir = self.dlg.lineEdit.text() + "/tif"
+        
+        # Make Output directory
+        os.makedirs(outdir, exist_ok=True)
+        
         for feat in layer.getSelectedFeatures():
             tile_fname = feat.attribute('fname')
+            base_fname = tile_fname.split(".")[0]
             
             filepath = self.dlg.lineEdit.text() + "/" + tile_fname
             url_path = url + tile_fname
@@ -202,7 +209,12 @@ class TileSelector:
                 file.write(chunk)
             file.close()
             
-
+            # Open Tile
+            ds = gdal.Open(filepath)
+            # Translate Tile into TIF
+            ds = gdal.Translate(outdir + "/" + base_fname + ".tif", ds, outputSRS="EPSG:25832")
+            ds = None
+            
 
     def run(self):
         """Run method that performs all the real work"""
@@ -214,11 +226,17 @@ class TileSelector:
             self.dlg = TileSelectorDialog()
             self.dlg.pushButton.clicked.connect(self.select_output)
 
+        """# Fetch the current loaded layers
+        layers = QgsProject.instance().layerTreeRoot().children()
+        # Clear the comboBox from previous runs
+        self.dlg.comboBox.clear()
+        # Fill the box with the loaded layers
+        self.dlg.comboBox.addItems([layer.name() for layer in layers])"""
 
         # Fetch the current active layer
         layer = self.iface.activeLayer()
         # Clear the listWidget from previous runs
-        self.dlg.listWidget.clear()
+        # self.dlg.listWidget.clear()
         # Fill the list with the active features names
         for feat in layer.getSelectedFeatures():
             self.dlg.listWidget.addItems([str(feat.attributes())])
